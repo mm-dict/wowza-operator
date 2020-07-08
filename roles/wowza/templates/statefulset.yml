@@ -88,7 +88,7 @@ spec:
             {% for storage in wowza.persistentstorage %}
             - name: 'wowza-persistent-storage-{{ storage.name }}'
               mountPath: '{{ storage.mountPath }}'
-            {% endif %}
+            {% endfor %}
           resources:
             requests:
               memory: '{{ wowza.resources.requests.mem }}'
@@ -124,4 +124,4 @@ spec:
         - name: 'wowza-persistent-storage-{{ storage.name }}'
           persistentVolumeClaim:
             claimName: '{{ storage.name }}'
-        {% endif %}
+        {% endfor %}
