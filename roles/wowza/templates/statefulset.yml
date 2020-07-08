@@ -85,10 +85,10 @@ spec:
             - name: 'wowza-emptydir-opencast'
               mountPath: '/usr/local/WowzaStreamingEngine/applications/opencast'
             {% endif %}
-            {% for storage in wowza.persistentstorage %}
-            - name: 'wowza-persistent-storage-{{ storage.name }}'
-              mountPath: '{{ storage.mountPath }}'
-            {% endfor %}
+            {% if wowza.persistentstorage is defined %}
+            - name: 'wowza-persistent-storage'
+              mountPath: '{{ wowza.persistentstorage.mountpath }}'
+            {% endif %}
           resources:
             requests:
               memory: '{{ wowza.resources.requests.mem }}'
@@ -120,8 +120,8 @@ spec:
         - name: 'wowza-emptydir-opencast'
           emptyDir: {}
         {% endif %}
-        {% for storage in wowza.persistentstorage %}
-        - name: 'wowza-persistent-storage-{{ storage.name }}'
+        {% if wowza.persistentstorage is defined %}
+        - name: 'wowza-persistent-storage'
           persistentVolumeClaim:
-            claimName: '{{ storage.name }}'
-        {% endfor %}
+            claimName: '{{ wowza.persistentstorage.name }}'
+        {% endif %}
