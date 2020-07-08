@@ -119,7 +119,7 @@ spec:
             name: '{{ meta.name }}-wowza-config-applications'
         - name: 'wowza-emptydir-opencast'
           emptyDir: {}
-        {% endfor %}
+        {% endif %}
         {% for storage in wowza.persistentstorage %}
         - name: 'wowza-persistent-storage-{{ storage.name }}'
           persistentVolumeClaim:
