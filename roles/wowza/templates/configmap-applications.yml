@@ -36,7 +36,7 @@ data:
         -->
         <Streams>
           <StreamType>default</StreamType>
-          <StorageDir>'{{ wowza.vidlib.storageDir }}'</StorageDir>
+          <StorageDir>'{{ wowza.vidlib.storagedir }}'</StorageDir>
           <KeyDir>${com.wowza.wms.context.VHostConfigHome}/keys</KeyDir>
           <!-- LiveStreamPacketizers (separate with commas): cupertinostreamingpacketizer, smoothstreamingpacketizer, sanjosestreamingpacketizer, mpegdashstreamingpacketizer, cupertinostreamingrepeater, smoothstreamingrepeater, sanjosestreamingrepeater, mpegdashstreamingrepeater, dvrstreamingpacketizer, dvrstreamingrepeater -->
           <LiveStreamPacketizers></LiveStreamPacketizers>
@@ -263,7 +263,7 @@ data:
         -->
         <Streams>
           <StreamType>default</StreamType>
-          <StorageDir>'{{ wowza.opencast.storageDir }}'</StorageDir>
+          <StorageDir>'{{ wowza.opencast.storagedir }}'</StorageDir>
           <KeyDir>${com.wowza.wms.context.VHostConfigHome}/keys</KeyDir>
           <!-- LiveStreamPacketizers (separate with commas): cupertinostreamingpacketizer, smoothstreamingpacketizer, sanjosestreamingpacketizer, mpegdashstreamingpacketizer, cupertinostreamingrepeater, smoothstreamingrepeater, sanjosestreamingrepeater, mpegdashstreamingrepeater, dvrstreamingpacketizer, dvrstreamingrepeater -->
           <LiveStreamPacketizers></LiveStreamPacketizers>
