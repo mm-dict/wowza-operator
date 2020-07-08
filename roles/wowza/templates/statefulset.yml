@@ -1,0 +1,127 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: '{{ meta.name }}-wowza'
+  namespace: '{{ meta.namespace }}'
+  labels:
+    app: wowza
+spec:
+  replicas: 2
+  serviceName: '{{ meta.name }}-wowza'
+  selector:
+    matchLabels:
+      app: wowza
+  minReadySeconds: 60
+  updateStrategy:
+    type: RollingUpdate
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: wowza
+    spec:
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - wowza
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+        - name: wowza
+          image: '{{ wowza.image | default('wowzamedia/wowza-streaming-engine-linux:4.8.0') }}'
+          imagePullPolicy: Always
+          livenessProbe:
+           failureThreshold: 3
+           httpGet:
+             path: /
+             port: 1935
+             scheme: HTTP
+           periodSeconds: 60
+           successThreshold: 1
+           timeoutSeconds: 10
+          command:
+            - /sbin/entrypoint.sh
+          ports:
+            - containerPort: 1935
+              name: streaming
+            - containerPort: 8088
+              name: manager
+          env:
+            - name: WSE_MGR_USER
+              value: '{{ wowza.user }}'
+            - name: WSE_MGR_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: '{{ meta.name }}-wowza-secrets'
+                  key: admin-pass
+            - name: WSE_LIC
+              valueFrom:
+                secretKeyRef:
+                  name: '{{ meta.name }}-wowza-secrets'
+                  key: licensekey
+          volumeMounts:
+            - name: wowza-config
+              mountPath: /usr/local/WowzaStreamingEngine/conf/Tune.xml
+              subPath: Tune.xml
+            {% if wowza.vidlib is defined %}
+            - name: wowza-config-vidlib
+              mountPath: '/usr/local/WowzaStreamingEngine/conf/vidlib/Application.xml'
+              subPath: 'Application-vidlib.xml'
+            - name: 'wowza-emptydir-vidlib'
+              mountPath: '/usr/local/WowzaStreamingEngine/applications/vidlib'
+            {% endif %}
+            {% if wowza.opencast is defined %}
+            - name: wowza-config-opencast
+              mountPath: '/usr/local/WowzaStreamingEngine/conf/opencast/Application.xml'
+              subPath: 'Application-opencast.xml'
+            - name: 'wowza-emptydir-opencast'
+              mountPath: '/usr/local/WowzaStreamingEngine/applications/opencast'
+            {% endif %}
+            {% for storage in wowza.persistentstorage %}
+            - name: 'wowza-persistent-storage-{{ storage.name }}'
+              mountPath: '{{ storage.mountPath }}'
+            {% endif %}
+          resources:
+            requests:
+              memory: '{{ wowza.resources.requests.mem }}'
+              cpu: '{{ wowza.resources.requests.cpu }}'
+            limits:
+              cpu: '{{ wowza.resources.limits.cpu }}'
+          livenessProbe:
+            initialDelaySeconds: 240
+            periodSeconds: 60
+            httpGet:
+              path: /
+              port: 1935
+              scheme: HTTP
+      volumes:
+        - name: wowza-config
+          configMap:
+            name: '{{ meta.name }}-wowza-config'
+        {% if wowza.vidlib is defined %}
+        - name: wowza-config-vidlib
+          configMap:
+            name: '{{ meta.name }}-wowza-config-applications'
+        - name: 'wowza-emptydir-vidlib'
+          emptyDir: {}
+        {% endif %}
+        {% if wowza.opencast is defined %}
+        - name: wowza-config-opencast
+          configMap:
+            name: '{{ meta.name }}-wowza-config-applications'
+        - name: 'wowza-emptydir-opencast'
+          emptyDir: {}
+        {% endfor %}
+        {% for storage in wowza.persistentstorage %}
+        - name: 'wowza-persistent-storage-{{ storage.name }}'
+          persistentVolumeClaim:
+            claimName: '{{ storage.name }}'
+        {% endif %}

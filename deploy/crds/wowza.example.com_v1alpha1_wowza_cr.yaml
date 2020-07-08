@@ -1,0 +1,26 @@
+apiVersion: wowza.example.com/v1alpha1
+kind: Wowza
+metadata:
+  name: example-wowza
+spec:
+  # Add fields here
+  replicas: 2
+  wowza:
+    user: 'admin'
+    pass: 'admin'
+    licensekey: 'xxxx-xxxx-xxxxx-xxxx'
+    #image: ''
+    # applications:
+    #   - name: vod
+    #     storageDir: /mount/vod
+    # persistentStorage:
+    #   - name: vod
+    #     mountPath: /mount/vod
+    HeapSize: '1000M'
+    resources:
+      requests:
+        cpu: 1
+        mem: 1G
+      limits:
+        cpu: 2
+        mem: 2G

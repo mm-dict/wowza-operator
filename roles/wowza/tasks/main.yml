@@ -1,0 +1,57 @@
+---
+# tasks file for wowza
+- name: Create the namespace
+  k8s:
+    state: present
+    api_version: v1
+    kind: Namespace
+    name: '{{ meta.namespace }}'
+
+- name: Create the secrets for the wowza deploy
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: secret
+      metadata:
+        namespace: '{{ meta.namespace }}'
+        name: '{{ meta.name }}-wowza-secrets'
+      data:
+        licensekey: '{{ wowza.licensekey | string | b64encode }}'
+        admin-pass: '{{ wowza.pass | string | b64encode }}'
+
+- name: Create the service for wowza
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: '{{ meta.name }}-wowza'
+        namespace: '{{ meta.namespace }}'
+        labels:
+          app: wowza
+      spec:
+        selector:
+          app: wowza
+        ports:
+        - port: 1935
+          name: streaming
+        - port: 8088
+          name: manager
+
+- name: Create the wowza configmap
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'templates/configmap.yml') }}"
+
+- name: Create the wowza applications configmap
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'templates/configmap-applications.yml') }}"
+  when: wowza.applications is defined
+
+- name: Create the wowza statefulset
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'templates/statefulset.yml') }}"
