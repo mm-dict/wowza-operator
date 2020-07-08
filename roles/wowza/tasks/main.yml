@@ -42,7 +42,6 @@
   k8s:
     state: present
     definition: "{{ lookup('template', 'templates/configmap-applications.yml') }}"
-  when: wowza.applications is defined
 
 - name: Create the wowza statefulset
   k8s:
