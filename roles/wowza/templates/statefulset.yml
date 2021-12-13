@@ -42,7 +42,7 @@ spec:
           livenessProbe:
            failureThreshold: 3
            httpGet:
-             path: /
+             path: /ServerVersion
              port: 1935
              scheme: HTTP
            periodSeconds: 60
